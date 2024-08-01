@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Guess the Number</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f0f2f5;
+        }
+        #game-container {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        input, button {
+            margin: 10px 0;
+            padding: 10px;
+            width: 200px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        button {
+            background-color: #0088cc;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #006699;
+        }
+    </style>
+</head>
+<body>
+    <div id="game-container">
+        <h1>Guess the Number</h1>
+        <p id="message">I'm thinking of a number between 1 and 100.</p>
+        <input type="number" id="guess-input" placeholder="Enter your guess">
+        <button onclick="checkGuess()">Guess</button>
+    </div>
+
+    <script>
+        let targetNumber = Math.floor(Math.random() * 100) + 1;
+        let attempts = 0;
+
+        function checkGuess() {
+            const guessInput = document.getElementById('guess-input');
+            const message = document.getElementById('message');
+            const guess = parseInt(guessInput.value);
+
+            if (isNaN(guess) || guess < 1 || guess > 100) {
+                message.textContent = "Please enter a valid number between 1 and 100.";
+                return;
+            }
+
+            attempts++;
+
+            if (guess === targetNumber) {
+                message.textContent = `Congratulations! You guessed the number in ${attempts} attempts!`;
+                guessInput.disabled = true;
+                if (window.Telegram && window.Telegram.WebApp) {
+                    window.Telegram.WebApp.sendData(JSON.stringify({
+                        event: 'game_won',
+                        attempts: attempts
+                    }));
+                }
+            } else if (guess < targetNumber) {
+                message.textContent = "Too low! Try a higher number.";
+            } else {
+                message.textContent = "Too high! Try a lower number.";
+            }
+
+            guessInput.value = '';
+        }
+
+        // Initialize Telegram Mini App
+        if (window.Telegram && window.Telegram.WebApp) {
+            window.Telegram.WebApp.ready();
+            window.Telegram.WebApp.expand();
+        }
+    </script>
+</body>
+</html>
