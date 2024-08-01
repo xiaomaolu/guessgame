@@ -32,6 +32,7 @@
         }
         p {
             color: #555;
+            font-size: 18px;
         }
         input, button {
             margin: 15px 0;
@@ -51,6 +52,24 @@
         button:hover {
             background-color: #006699;
         }
+        #result-container {
+            display: none;
+            margin-top: 20px;
+            padding: 20px;
+            background-color: #4caf50;
+            color: white;
+            border-radius: 8px;
+            font-weight: bold;
+        }
+        #new-game {
+            display: none;
+            margin-top: 20px;
+            background-color: #f44336;
+        }
+        #email-input {
+            display: none;
+            margin-top: 20px;
+        }
         #fireworks {
             position: absolute;
             top: 0;
@@ -68,6 +87,12 @@
         <p id="message">I'm thinking of a number between 1 and 1000.</p>
         <input type="number" id="guess-input" placeholder="Enter your guess">
         <button onclick="checkGuess()">Guess</button>
+        <div id="result-container"></div>
+        <button id="new-game" onclick="startNewGame()">Start New Game</button>
+        <div id="email-input">
+            <input type="email" id="email" placeholder="Enter your email">
+            <button onclick="submitEmail()">Submit Email</button>
+        </div>
     </div>
 
     <canvas id="fireworks"></canvas>
@@ -79,6 +104,10 @@
         function checkGuess() {
             const guessInput = document.getElementById('guess-input');
             const message = document.getElementById('message');
+            const resultContainer = document.getElementById('result-container');
+            const newGameButton = document.getElementById('new-game');
+            const emailInputContainer = document.getElementById('email-input');
+
             const guess = parseInt(guessInput.value);
 
             if (isNaN(guess) || guess < 1 || guess > 1000) {
@@ -89,8 +118,13 @@
             attempts++;
 
             if (guess === targetNumber) {
-                message.textContent = "Congratulations, you are one step closer to BTC!";
+                message.style.display = 'none'; // 隐藏提示信息
+                resultContainer.style.display = 'block';
+                resultContainer.textContent = `Congratulations! You guessed the number ${targetNumber} in ${attempts} attempts!`;
                 guessInput.disabled = true;
+                newGameButton.style.display = 'block';
+                emailInputContainer.style.display = 'block';
+
                 if (window.Telegram && window.Telegram.WebApp) {
                     window.Telegram.WebApp.sendData(JSON.stringify({
                         event: 'game_won',
@@ -105,6 +139,28 @@
             }
 
             guessInput.value = '';
+        }
+
+        function startNewGame() {
+            targetNumber = Math.floor(Math.random() * 1000) + 1; // 重新生成目标数字
+            attempts = 0;
+            document.getElementById('message').style.display = 'block';
+            document.getElementById('message').textContent = "I'm thinking of a number between 1 and 1000.";
+            document.getElementById('guess-input').disabled = false;
+            document.getElementById('guess-input').value = '';
+            document.getElementById('result-container').style.display = 'none';
+            document.getElementById('new-game').style.display = 'none';
+            document.getElementById('email-input').style.display = 'none';
+        }
+
+        function submitEmail() {
+            const email = document.getElementById('email').value;
+            if (email === '') {
+                alert("Please enter a valid email address.");
+            } else {
+                alert(`Email submitted: ${email}`);
+                // 这里可以添加代码将邮箱发送到服务器进行处理
+            }
         }
 
         // 初始化Telegram Mini App
